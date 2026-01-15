@@ -50,6 +50,9 @@ public class MainViewModel : ViewModelBase
 
         // 問合せ保存時のイベント購読
         Inquiry.InquirySaved += OnInquirySaved;
+
+        // 顧客紐付けリクエストのイベント購読
+        Inquiry.LinkCustomerRequested += OnLinkCustomerRequested;
     }
 
     /// <summary>
@@ -82,7 +85,6 @@ public class MainViewModel : ViewModelBase
     private async void OnCustomerSelected(object? sender, CustomerSearchResult customer)
     {
         await CustomerInfo.LoadCustomerAsync(customer.CustomerKey);
-        Inquiry.SetCustomerKey(customer.CustomerKey);
     }
 
     /// <summary>
@@ -127,6 +129,27 @@ public class MainViewModel : ViewModelBase
         if (!string.IsNullOrEmpty(CustomerInfo.CurrentCustomerKey))
         {
             await CustomerInfo.LoadCustomerAsync(CustomerInfo.CurrentCustomerKey);
+        }
+    }
+
+    /// <summary>
+    /// 顧客紐付けリクエスト時の処理
+    /// </summary>
+    private void OnLinkCustomerRequested(object? sender, EventArgs e)
+    {
+        // 検索結果で選択中の顧客を取得
+        if (SearchPanel.SelectedSearchResult is CustomerSearchResult customer)
+        {
+            Inquiry.SetCustomerKey(customer.CustomerKey);
+        }
+        else if (!string.IsNullOrEmpty(CustomerInfo.CurrentCustomerKey))
+        {
+            // 顧客情報パネルに表示中の顧客を使用
+            Inquiry.SetCustomerKey(CustomerInfo.CurrentCustomerKey);
+        }
+        else
+        {
+            _dialogService.ShowMessage("紐付ける顧客を検索結果から選択してください。");
         }
     }
 

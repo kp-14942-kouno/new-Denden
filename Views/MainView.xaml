@@ -388,8 +388,19 @@
                             <!-- 顧客Key -->
                             <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,16">
                                 <TextBlock Text="顧客Key" Margin="0,0,0,4"/>
-                                <TextBox Height="32" IsReadOnly="True" Background="#F5F5F5"
-                                         Text="{Binding CustomerKey, Mode=OneWay}"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBox Grid.Column="0" Height="32" IsReadOnly="True" Background="#F5F5F5"
+                                             Text="{Binding CustomerKey, Mode=OneWay}"/>
+                                    <Button Grid.Column="1" Content="紐付け" Width="60" Height="32" Margin="8,0,0,0"
+                                            Command="{Binding LinkCustomerCommand}"/>
+                                    <Button Grid.Column="2" Content="解除" Width="60" Height="32" Margin="8,0,0,0"
+                                            Command="{Binding UnlinkCustomerCommand}"/>
+                                </Grid>
                             </StackPanel>
 
                             <!-- カテゴリー -->

@@ -95,6 +95,8 @@ public class InquiryViewModel : ViewModelBase
         SaveCommand = new RelayCommand(async () => await SaveAsync(), () => !IsSaving);
         ClearCommand = new RelayCommand(Clear);
         NewCommand = new RelayCommand(PrepareNew);
+        LinkCustomerCommand = new RelayCommand(RequestLinkCustomer, () => !HasCustomerKey);
+        UnlinkCustomerCommand = new RelayCommand(UnlinkCustomer, () => HasCustomerKey);
 
         // 初期状態
         PrepareNew();
@@ -153,8 +155,16 @@ public class InquiryViewModel : ViewModelBase
     public string? CustomerKey
     {
         get => _customerKey;
-        set => SetProperty(ref _customerKey, value);
+        set
+        {
+            if (SetProperty(ref _customerKey, value))
+            {
+                OnPropertyChanged(nameof(HasCustomerKey));
+            }
+        }
     }
+
+    public bool HasCustomerKey => !string.IsNullOrEmpty(CustomerKey);
 
     public bool IsEditMode
     {
@@ -201,12 +211,15 @@ public class InquiryViewModel : ViewModelBase
     public ICommand SaveCommand { get; }
     public ICommand ClearCommand { get; }
     public ICommand NewCommand { get; }
+    public ICommand LinkCustomerCommand { get; }
+    public ICommand UnlinkCustomerCommand { get; }
 
     #endregion
 
     #region イベント
 
     public event EventHandler? InquirySaved;
+    public event EventHandler? LinkCustomerRequested;
 
     #endregion
 
@@ -400,6 +413,22 @@ public class InquiryViewModel : ViewModelBase
     }
 
     /// <summary>
+    /// 顧客紐付けをリクエスト
+    /// </summary>
+    private void RequestLinkCustomer()
+    {
+        LinkCustomerRequested?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <summary>
+    /// 顧客紐付けを解除
+    /// </summary>
+    private void UnlinkCustomer()
+    {
+        CustomerKey = null;
+    }
+
+    /// <summary>
     /// 保存処理
     /// </summary>
     private async Task SaveAsync()
@@ -507,6 +536,7 @@ public class InquiryViewModel : ViewModelBase
             await SaveHistoryLogAsync(_originalInquiry);
         }
 
+        _currentInquiry.CustomerKey = CustomerKey;
         _currentInquiry.CategoryID = SelectedCategory?.CategoryID > 0 ? SelectedCategory.CategoryID : null;
         _currentInquiry.StatusID = SelectedStatus?.StatusID > 0 ? SelectedStatus.StatusID : null;
         _currentInquiry.InquiryContent = InquiryContent;
