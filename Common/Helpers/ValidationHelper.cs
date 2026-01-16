@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace DeDen.Common.Helpers;
+namespace DenDen.Common.Helpers;
 
 /// <summary>
 /// バリデーションヘルパー

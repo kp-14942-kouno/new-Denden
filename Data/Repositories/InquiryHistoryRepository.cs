@@ -1,9 +1,9 @@
 using Dapper;
-using DeDen.Data.Database;
-using DeDen.Models.DTOs;
-using DeDen.Models.Entities;
+using DenDen.Data.Database;
+using DenDen.Models.DTOs;
+using DenDen.Models.Entities;
 
-namespace DeDen.Data.Repositories;
+namespace DenDen.Data.Repositories;
 
 /// <summary>
 /// 問合せ履歴リポジトリの実装
@@ -11,10 +11,12 @@ namespace DeDen.Data.Repositories;
 public class InquiryHistoryRepository : IInquiryHistoryRepository
 {
     private readonly IDbConnectionFactory _connectionFactory;
+    private readonly IOperatorRepository _operatorRepository;
 
-    public InquiryHistoryRepository(IDbConnectionFactory connectionFactory)
+    public InquiryHistoryRepository(IDbConnectionFactory connectionFactory, IOperatorRepository operatorRepository)
     {
         _connectionFactory = connectionFactory;
+        _operatorRepository = operatorRepository;
     }
 
     /// <inheritdoc/>
@@ -77,7 +79,12 @@ public class InquiryHistoryRepository : IInquiryHistoryRepository
             ORDER BY FirstReceivedDateTime DESC
             LIMIT 100";
 
-        return await connection.QueryAsync<InquiryHistory>(sql, parameters);
+        var results = (await connection.QueryAsync<InquiryHistory>(sql, parameters)).ToList();
+
+        // オペレーター名を補完
+        await PopulateUpdatedByNamesAsync(projectId, results);
+
+        return results;
     }
 
     /// <inheritdoc/>
@@ -91,7 +98,12 @@ public class InquiryHistoryRepository : IInquiryHistoryRepository
             WHERE ProjectID = @ProjectId AND CustomerKey = @CustomerKey
             ORDER BY FirstReceivedDateTime DESC";
 
-        return await connection.QueryAsync<InquiryHistory>(sql, new { ProjectId = projectId, CustomerKey = customerKey });
+        var results = (await connection.QueryAsync<InquiryHistory>(sql, new { ProjectId = projectId, CustomerKey = customerKey })).ToList();
+
+        // オペレーター名を補完
+        await PopulateUpdatedByNamesAsync(projectId, results);
+
+        return results;
     }
 
     /// <inheritdoc/>
@@ -101,7 +113,15 @@ public class InquiryHistoryRepository : IInquiryHistoryRepository
         connection.Open();
 
         var sql = "SELECT * FROM InquiryHistory WHERE InquiryID = @InquiryId";
-        return await connection.QueryFirstOrDefaultAsync<InquiryHistory>(sql, new { InquiryId = inquiryId });
+        var result = await connection.QueryFirstOrDefaultAsync<InquiryHistory>(sql, new { InquiryId = inquiryId });
+
+        // オペレーター名を補完
+        if (result != null)
+        {
+            await PopulateUpdatedByNamesAsync(result.ProjectID, new List<InquiryHistory> { result });
+        }
+
+        return result;
     }
 
     /// <inheritdoc/>
@@ -155,5 +175,34 @@ public class InquiryHistoryRepository : IInquiryHistoryRepository
             WHERE InquiryID = @InquiryID";
 
         await connection.ExecuteAsync(sql, inquiry);
+    }
+
+    /// <summary>
+    /// 問合せ履歴リストにオペレーター名を補完
+    /// </summary>
+    private async Task PopulateUpdatedByNamesAsync(int projectId, List<InquiryHistory> histories)
+    {
+        // UpdatedByが設定されている履歴のみ対象
+        var updatedByIds = histories
+            .Where(h => h.UpdatedBy.HasValue)
+            .Select(h => h.UpdatedBy!.Value)
+            .Distinct()
+            .ToList();
+
+        if (!updatedByIds.Any())
+            return;
+
+        // オペレーター一覧を取得
+        var operators = await _operatorRepository.GetAllByProjectIdAsync(projectId);
+        var operatorDict = operators.ToDictionary(o => o.OperatorID, o => o.OperatorName);
+
+        // オペレーター名を補完
+        foreach (var history in histories)
+        {
+            if (history.UpdatedBy.HasValue && operatorDict.TryGetValue(history.UpdatedBy.Value, out var name))
+            {
+                history.UpdatedByName = name;
+            }
+        }
     }
 }

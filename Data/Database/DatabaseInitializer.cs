@@ -1,9 +1,9 @@
 using System.IO;
 using System.Reflection;
 using Dapper;
-using DeDen.Models;
+using DenDen.Models;
 
-namespace DeDen.Data.Database;
+namespace DenDen.Data.Database;
 
 /// <summary>
 /// データベース初期化サービス

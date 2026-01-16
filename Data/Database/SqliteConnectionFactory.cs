@@ -1,9 +1,9 @@
 using System.Data;
 using System.IO;
 using Microsoft.Data.Sqlite;
-using DeDen.Models;
+using DenDen.Models;
 
-namespace DeDen.Data.Database;
+namespace DenDen.Data.Database;
 
 /// <summary>
 /// SQLite用の接続ファクトリ

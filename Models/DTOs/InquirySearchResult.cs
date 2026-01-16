@@ -1,4 +1,4 @@
-namespace DeDen.Models.DTOs;
+namespace DenDen.Models.DTOs;
 
 /// <summary>
 /// 問合せ履歴検索結果

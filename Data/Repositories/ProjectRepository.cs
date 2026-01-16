@@ -1,9 +1,9 @@
 using System.Data;
 using Dapper;
-using DeDen.Data.Database;
-using DeDen.Models.Entities;
+using DenDen.Data.Database;
+using DenDen.Models.Entities;
 
-namespace DeDen.Data.Repositories;
+namespace DenDen.Data.Repositories;
 
 /// <summary>
 /// 案件マスタリポジトリ

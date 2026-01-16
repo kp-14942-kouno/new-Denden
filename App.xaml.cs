@@ -2,13 +2,13 @@
 using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using DeDen.Data.Database;
-using DeDen.Data.Repositories;
-using DeDen.Models;
-using DeDen.Services;
-using DeDen.ViewModels;
+using DenDen.Data.Database;
+using DenDen.Data.Repositories;
+using DenDen.Models;
+using DenDen.Services;
+using DenDen.ViewModels;
 
-namespace DeDen;
+namespace DenDen;
 
 /// <summary>
 /// Interaction logic for App.xaml

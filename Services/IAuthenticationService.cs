@@ -1,6 +1,6 @@
-using DeDen.Models.DTOs;
+using DenDen.Models.DTOs;
 
-namespace DeDen.Services;
+namespace DenDen.Services;
 
 /// <summary>
 /// 認証サービスのインターフェース

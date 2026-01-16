@@ -140,3 +140,8 @@ INSERT OR IGNORE INTO InquiryHistory (
      'サービス品質に不満。遅延が頻繁に発生している。',
      '状況を確認中。技術部門と連携して原因調査を行う。',
      '2025-01-14 14:00:00', 2);
+
+-- 更新履歴のテストデータ（一部を更新済み状態に）
+UPDATE InquiryHistory SET UpdatedDateTime = '2025-01-11 10:00:00', UpdatedBy = 2 WHERE InquiryID = 1;
+UPDATE InquiryHistory SET UpdatedDateTime = '2025-01-13 15:30:00', UpdatedBy = 1 WHERE InquiryID = 2;
+UPDATE InquiryHistory SET UpdatedDateTime = '2025-01-15 09:15:00', UpdatedBy = 2 WHERE InquiryID = 4;

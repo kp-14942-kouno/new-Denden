@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
-using DeDen.Data.Repositories;
-using DeDen.Models.DTOs;
-using DeDen.Models.Entities;
-using DeDen.Services;
+using DenDen.Data.Repositories;
+using DenDen.Models.DTOs;
+using DenDen.Models.Entities;
+using DenDen.Services;
 
-namespace DeDen.ViewModels;
+namespace DenDen.ViewModels;
 
 /// <summary>
 /// 顧客情報表示のViewModel

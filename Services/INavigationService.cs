@@ -1,6 +1,6 @@
-using DeDen.ViewModels;
+using DenDen.ViewModels;
 
-namespace DeDen.Services;
+namespace DenDen.Services;
 
 /// <summary>
 /// ナビゲーションサービスのインターフェース

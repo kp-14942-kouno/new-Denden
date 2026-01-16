@@ -1,8 +1,8 @@
 using System.Data;
 using System.Data.OleDb;
-using DeDen.Models;
+using DenDen.Models;
 
-namespace DeDen.Data.Database;
+namespace DenDen.Data.Database;
 
 /// <summary>
 /// Access用の接続ファクトリ

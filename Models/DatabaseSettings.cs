@@ -1,4 +1,4 @@
-namespace DeDen.Models;
+namespace DenDen.Models;
 
 /// <summary>
 /// データベース設定

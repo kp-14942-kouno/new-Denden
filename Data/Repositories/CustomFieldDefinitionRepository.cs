@@ -1,8 +1,8 @@
 using Dapper;
-using DeDen.Data.Database;
-using DeDen.Models.Entities;
+using DenDen.Data.Database;
+using DenDen.Models.Entities;
 
-namespace DeDen.Data.Repositories;
+namespace DenDen.Data.Repositories;
 
 /// <summary>
 /// カスタム項目定義リポジトリの実装

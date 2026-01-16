@@ -1,4 +1,4 @@
-namespace DeDen.Models.Entities;
+namespace DenDen.Models.Entities;
 
 /// <summary>
 /// レポート用顧客情報表示設定

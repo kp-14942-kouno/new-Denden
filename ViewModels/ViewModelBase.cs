@@ -1,7 +1,7 @@
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
-namespace DeDen.ViewModels;
+namespace DenDen.ViewModels;
 
 /// <summary>
 /// ViewModelの基底クラス

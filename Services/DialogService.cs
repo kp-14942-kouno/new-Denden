@@ -1,6 +1,6 @@
 using System.Windows;
 
-namespace DeDen.Services;
+namespace DenDen.Services;
 
 /// <summary>
 /// ダイアログサービスの実装

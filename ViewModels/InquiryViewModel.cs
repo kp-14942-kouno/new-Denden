@@ -3,13 +3,13 @@ using System.Text.Json;
 using System.Windows.Controls;
 using System.Windows.Documents;
 using System.Windows.Input;
-using DeDen.Common;
-using DeDen.Data.Repositories;
-using DeDen.Models.Entities;
-using DeDen.Services;
-using DeDen.Views;
+using DenDen.Common;
+using DenDen.Data.Repositories;
+using DenDen.Models.Entities;
+using DenDen.Services;
+using DenDen.Views;
 
-namespace DeDen.ViewModels;
+namespace DenDen.ViewModels;
 
 /// <summary>
 /// カスタム項目の入力用モデル

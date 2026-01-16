@@ -1,4 +1,4 @@
-namespace DeDen.Models;
+namespace DenDen.Models;
 
 /// <summary>
 /// 画像設定

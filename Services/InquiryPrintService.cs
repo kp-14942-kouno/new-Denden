@@ -1,9 +1,9 @@
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using DeDen.Data.Repositories;
+using DenDen.Data.Repositories;
 
-namespace DeDen.Services;
+namespace DenDen.Services;
 
 /// <summary>
 /// 問合せ印刷サービス

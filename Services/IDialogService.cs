@@ -1,4 +1,4 @@
-namespace DeDen.Services;
+namespace DenDen.Services;
 
 /// <summary>
 /// ダイアログサービスのインターフェース

@@ -1,8 +1,8 @@
-﻿<Application x:Class="DeDen.App"
+﻿<Application x:Class="DenDen.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:local="clr-namespace:DeDen"
-             xmlns:converters="clr-namespace:DeDen.Common.Converters">
+             xmlns:local="clr-namespace:DenDen"
+             xmlns:converters="clr-namespace:DenDen.Common.Converters">
     <Application.Resources>
         <!-- Converters -->
         <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter"/>

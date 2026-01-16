@@ -1,6 +1,6 @@
 using System.Windows.Controls;
 
-namespace DeDen.Views;
+namespace DenDen.Views;
 
 /// <summary>
 /// MainView.xaml の相互作用ロジック

@@ -1,4 +1,4 @@
-namespace DeDen.Models;
+namespace DenDen.Models;
 
 /// <summary>
 /// 顧客マスタ設定

@@ -1,4 +1,4 @@
-namespace DeDen.Models.Entities;
+namespace DenDen.Models.Entities;
 
 /// <summary>
 /// 問合せ履歴
@@ -69,6 +69,11 @@ public class InquiryHistory
     /// 最終更新者（OperatorID）
     /// </summary>
     public int? UpdatedBy { get; set; }
+
+    /// <summary>
+    /// 最終更新者名（JOINで取得、表示用）
+    /// </summary>
+    public string? UpdatedByName { get; set; }
 
     /// <summary>
     /// カスタム項目1

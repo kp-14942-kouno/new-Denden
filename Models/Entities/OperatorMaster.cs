@@ -1,4 +1,4 @@
-namespace DeDen.Models.Entities;
+namespace DenDen.Models.Entities;
 
 /// <summary>
 /// オペレーターマスタ

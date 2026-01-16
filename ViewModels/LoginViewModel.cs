@@ -1,13 +1,13 @@
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Input;
-using DeDen.Common;
-using DeDen.Data.Repositories;
-using DeDen.Models.DTOs;
-using DeDen.Models.Entities;
-using DeDen.Services;
+using DenDen.Common;
+using DenDen.Data.Repositories;
+using DenDen.Models.DTOs;
+using DenDen.Models.Entities;
+using DenDen.Services;
 
-namespace DeDen.ViewModels;
+namespace DenDen.ViewModels;
 
 /// <summary>
 /// ログイン画面のViewModel

@@ -1,6 +1,6 @@
-using DeDen.Models.Entities;
+using DenDen.Models.Entities;
 
-namespace DeDen.Services;
+namespace DenDen.Services;
 
 /// <summary>
 /// セッション管理クラス

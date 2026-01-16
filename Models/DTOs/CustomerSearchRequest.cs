@@ -1,4 +1,4 @@
-namespace DeDen.Models.DTOs;
+namespace DenDen.Models.DTOs;
 
 /// <summary>
 /// 顧客検索リクエスト

@@ -1,9 +1,9 @@
 using System.IO;
 using System.Text;
 using Microsoft.Win32;
-using DeDen.Models.Entities;
+using DenDen.Models.Entities;
 
-namespace DeDen.Services;
+namespace DenDen.Services;
 
 /// <summary>
 /// エクスポートサービス
@@ -59,6 +59,7 @@ public class ExportService : IExportService
             "対応内容",
             "初回受電日時",
             "更新日時",
+            "最終更新者",
             "作成日時",
             "カスタム項目1",
             "カスタム項目2",
@@ -87,6 +88,7 @@ public class ExportService : IExportService
                 EscapeCsvField(inquiry.ResponseContent),
                 inquiry.FirstReceivedDateTime.ToString("yyyy/MM/dd HH:mm:ss"),
                 inquiry.UpdatedDateTime?.ToString("yyyy/MM/dd HH:mm:ss") ?? "",
+                EscapeCsvField(inquiry.UpdatedByName),
                 inquiry.CreatedAt.ToString("yyyy/MM/dd HH:mm:ss"),
                 EscapeCsvField(inquiry.CustomCol01),
                 EscapeCsvField(inquiry.CustomCol02),

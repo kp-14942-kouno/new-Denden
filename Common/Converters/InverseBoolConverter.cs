@@ -1,7 +1,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace DeDen.Common.Converters;
+namespace DenDen.Common.Converters;
 
 /// <summary>
 /// bool を反転するコンバーター

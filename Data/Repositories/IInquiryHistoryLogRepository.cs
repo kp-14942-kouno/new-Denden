@@ -1,6 +1,6 @@
-using DeDen.Models.Entities;
+using DenDen.Models.Entities;
 
-namespace DeDen.Data.Repositories;
+namespace DenDen.Data.Repositories;
 
 /// <summary>
 /// 問合せ履歴更新ログリポジトリのインターフェース

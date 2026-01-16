@@ -1,6 +1,6 @@
-using DeDen.Models.DTOs;
+using DenDen.Models.DTOs;
 
-namespace DeDen.Data.Repositories;
+namespace DenDen.Data.Repositories;
 
 /// <summary>
 /// 顧客マスタリポジトリのインターフェース

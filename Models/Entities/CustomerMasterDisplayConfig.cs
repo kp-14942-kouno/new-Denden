@@ -1,4 +1,4 @@
-namespace DeDen.Models.Entities;
+namespace DenDen.Models.Entities;
 
 /// <summary>
 /// 顧客マスタ表示設定グループ

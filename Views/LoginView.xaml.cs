@@ -1,8 +1,8 @@
 using System.Windows;
 using System.Windows.Controls;
-using DeDen.ViewModels;
+using DenDen.ViewModels;
 
-namespace DeDen.Views;
+namespace DenDen.Views;
 
 /// <summary>
 /// LoginView.xaml の相互作用ロジック

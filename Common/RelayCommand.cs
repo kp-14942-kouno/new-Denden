@@ -1,6 +1,6 @@
 using System.Windows.Input;
 
-namespace DeDen.Common;
+namespace DenDen.Common;
 
 /// <summary>
 /// ICommandの実装（パラメータなし）

@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace DeDen.Data.Database;
+namespace DenDen.Data.Database;
 
 /// <summary>
 /// データベース接続ファクトリのインターフェース

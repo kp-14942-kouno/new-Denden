@@ -1,7 +1,7 @@
 using System.Windows.Documents;
-using DeDen.Models.Entities;
+using DenDen.Models.Entities;
 
-namespace DeDen.Services;
+namespace DenDen.Services;
 
 /// <summary>
 /// 問合せ印刷データ

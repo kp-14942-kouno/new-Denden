@@ -2,7 +2,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Documents;
 
-namespace DeDen.Views;
+namespace DenDen.Views;
 
 /// <summary>
 /// PrintPreviewWindow.xaml の相互作用ロジック

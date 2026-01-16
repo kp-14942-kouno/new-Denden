@@ -1,9 +1,9 @@
 using System.Data;
 using Dapper;
-using DeDen.Data.Database;
-using DeDen.Models.DTOs;
+using DenDen.Data.Database;
+using DenDen.Models.DTOs;
 
-namespace DeDen.Data.Repositories;
+namespace DenDen.Data.Repositories;
 
 /// <summary>
 /// 顧客マスタリポジトリの実装

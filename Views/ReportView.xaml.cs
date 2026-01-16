@@ -1,7 +1,7 @@
 using System.Windows;
-using DeDen.ViewModels;
+using DenDen.ViewModels;
 
-namespace DeDen.Views;
+namespace DenDen.Views;
 
 /// <summary>
 /// ReportView.xaml の相互作用ロジック

@@ -1,8 +1,8 @@
 using System.Data;
 using Microsoft.Data.SqlClient;
-using DeDen.Models;
+using DenDen.Models;
 
-namespace DeDen.Data.Database;
+namespace DenDen.Data.Database;
 
 /// <summary>
 /// SQL Server用の接続ファクトリ

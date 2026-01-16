@@ -1,8 +1,8 @@
 using System.Windows;
-using DeDen.ViewModels;
-using DeDen.Views;
+using DenDen.ViewModels;
+using DenDen.Views;
 
-namespace DeDen;
+namespace DenDen;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml

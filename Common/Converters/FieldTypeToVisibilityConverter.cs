@@ -2,7 +2,7 @@ using System.Globalization;
 using System.Windows;
 using System.Windows.Data;
 
-namespace DeDen.Common.Converters;
+namespace DenDen.Common.Converters;
 
 /// <summary>
 /// FieldType の値と ConverterParameter が一致する場合に Visible を返すコンバーター

@@ -1,11 +1,11 @@
 using System.Collections.ObjectModel;
 using System.Windows.Input;
-using DeDen.Common;
-using DeDen.Models.Entities;
-using DeDen.Services;
-using DeDen.Views;
+using DenDen.Common;
+using DenDen.Models.Entities;
+using DenDen.Services;
+using DenDen.Views;
 
-namespace DeDen.ViewModels;
+namespace DenDen.ViewModels;
 
 /// <summary>
 /// レポート画面のViewModel

@@ -1,12 +1,12 @@
 using System.Windows.Input;
 using Microsoft.Extensions.DependencyInjection;
-using DeDen.Common;
-using DeDen.Models.DTOs;
-using DeDen.Models.Entities;
-using DeDen.Services;
-using DeDen.Views;
+using DenDen.Common;
+using DenDen.Models.DTOs;
+using DenDen.Models.Entities;
+using DenDen.Services;
+using DenDen.Views;
 
-namespace DeDen.ViewModels;
+namespace DenDen.ViewModels;
 
 /// <summary>
 /// メイン画面のViewModel

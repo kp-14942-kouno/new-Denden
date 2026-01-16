@@ -1,6 +1,6 @@
-using DeDen.Models;
+using DenDen.Models;
 
-namespace DeDen.Services;
+namespace DenDen.Services;
 
 /// <summary>
 /// 設定管理サービスのインターフェース

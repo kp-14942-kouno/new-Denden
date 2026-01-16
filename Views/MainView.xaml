@@ -1,4 +1,4 @@
-<UserControl x:Class="DeDen.Views.MainView"
+<UserControl x:Class="DenDen.Views.MainView"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
@@ -221,6 +221,8 @@
                                 <DataGridTextColumn Header="受付日時" Binding="{Binding FirstReceivedDateTime, StringFormat=yyyy/MM/dd HH:mm}" Width="130"/>
                                 <DataGridTextColumn Header="顧客Key" Binding="{Binding CustomerKey}" Width="100"/>
                                 <DataGridTextColumn Header="問合せ内容" Binding="{Binding InquiryContent}" Width="*"/>
+                                <DataGridTextColumn Header="更新日時" Binding="{Binding UpdatedDateTime, StringFormat=yyyy/MM/dd HH:mm}" Width="130"/>
+                                <DataGridTextColumn Header="更新者" Binding="{Binding UpdatedByName}" Width="80"/>
                             </DataGrid.Columns>
                         </DataGrid>
 
@@ -343,6 +345,8 @@
                                             <DataGridTextColumn Header="受付日時" Binding="{Binding FirstReceivedDateTime, StringFormat=yyyy/MM/dd HH:mm}" Width="130"/>
                                             <DataGridTextColumn Header="カテゴリ" Binding="{Binding CategoryID}" Width="80"/>
                                             <DataGridTextColumn Header="問合せ内容" Binding="{Binding InquiryContent}" Width="*"/>
+                                            <DataGridTextColumn Header="更新日時" Binding="{Binding UpdatedDateTime, StringFormat=yyyy/MM/dd HH:mm}" Width="130"/>
+                                            <DataGridTextColumn Header="更新者" Binding="{Binding UpdatedByName}" Width="80"/>
                                         </DataGrid.Columns>
                                     </DataGrid>
                                 </Grid>
