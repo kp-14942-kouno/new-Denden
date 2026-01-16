@@ -1,10 +1,13 @@
 using System.Collections.ObjectModel;
 using System.Text.Json;
+using System.Windows.Controls;
+using System.Windows.Documents;
 using System.Windows.Input;
 using DeDen.Common;
 using DeDen.Data.Repositories;
 using DeDen.Models.Entities;
 using DeDen.Services;
+using DeDen.Views;
 
 namespace DeDen.ViewModels;
 
@@ -54,6 +57,7 @@ public class InquiryViewModel : ViewModelBase
     private readonly IStatusRepository _statusRepository;
     private readonly SessionManager _sessionManager;
     private readonly IDialogService _dialogService;
+    private readonly IInquiryPrintService _inquiryPrintService;
 
     private InquiryHistory? _currentInquiry;
     private InquiryHistory? _originalInquiry; // 更新前の状態を保持
@@ -82,7 +86,8 @@ public class InquiryViewModel : ViewModelBase
         ICategoryRepository categoryRepository,
         IStatusRepository statusRepository,
         SessionManager sessionManager,
-        IDialogService dialogService)
+        IDialogService dialogService,
+        IInquiryPrintService inquiryPrintService)
     {
         _inquiryHistoryRepository = inquiryHistoryRepository;
         _inquiryHistoryLogRepository = inquiryHistoryLogRepository;
@@ -91,12 +96,15 @@ public class InquiryViewModel : ViewModelBase
         _statusRepository = statusRepository;
         _sessionManager = sessionManager;
         _dialogService = dialogService;
+        _inquiryPrintService = inquiryPrintService;
 
         SaveCommand = new RelayCommand(async () => await SaveAsync(), () => !IsSaving);
         ClearCommand = new RelayCommand(Clear);
         NewCommand = new RelayCommand(PrepareNew);
         LinkCustomerCommand = new RelayCommand(RequestLinkCustomer, () => !HasCustomerKey);
         UnlinkCustomerCommand = new RelayCommand(UnlinkCustomer, () => HasCustomerKey);
+        PrintCommand = new RelayCommand(async () => await PrintAsync());
+        PreviewCommand = new RelayCommand(async () => await PreviewAsync());
 
         // 初期状態
         PrepareNew();
@@ -213,6 +221,8 @@ public class InquiryViewModel : ViewModelBase
     public ICommand NewCommand { get; }
     public ICommand LinkCustomerCommand { get; }
     public ICommand UnlinkCustomerCommand { get; }
+    public ICommand PrintCommand { get; }
+    public ICommand PreviewCommand { get; }
 
     #endregion
 
@@ -653,5 +663,96 @@ public class InquiryViewModel : ViewModelBase
         }
 
         PrepareNew();
+    }
+
+    /// <summary>
+    /// 印刷処理
+    /// </summary>
+    private async Task PrintAsync()
+    {
+        try
+        {
+            var document = await CreatePrintDocumentAsync();
+            if (document == null) return;
+
+            var printDialog = new PrintDialog();
+            if (printDialog.ShowDialog() == true)
+            {
+                var paginator = ((IDocumentPaginatorSource)document).DocumentPaginator;
+                printDialog.PrintDocument(paginator, "問合せ票");
+                _dialogService.ShowMessage("印刷が完了しました。");
+            }
+        }
+        catch (Exception ex)
+        {
+            _dialogService.ShowError($"印刷中にエラーが発生しました。\n{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// プレビュー処理
+    /// </summary>
+    private async Task PreviewAsync()
+    {
+        try
+        {
+            var document = await CreatePrintDocumentAsync();
+            if (document == null) return;
+
+            var previewWindow = new PrintPreviewWindow
+            {
+                Title = "問合せ票 - 印刷プレビュー"
+            };
+            previewWindow.SetDocument(document);
+            previewWindow.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            _dialogService.ShowError($"プレビュー表示中にエラーが発生しました。\n{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// 印刷用ドキュメントを作成
+    /// </summary>
+    private async Task<FlowDocument?> CreatePrintDocumentAsync()
+    {
+        if (string.IsNullOrWhiteSpace(InquiryContent))
+        {
+            _dialogService.ShowMessage("問合せ内容を入力してから印刷してください。");
+            return null;
+        }
+
+        // 印刷データを作成
+        var printData = new InquiryPrintData
+        {
+            ReceivedDateTime = ReceivedDateTime,
+            OperatorName = OperatorName,
+            CustomerKey = CustomerKey,
+            CategoryName = SelectedCategory?.CategoryName,
+            StatusName = SelectedStatus?.StatusName,
+            InquiryContent = InquiryContent,
+            ResponseContent = ResponseContent
+        };
+
+        // カスタム項目を追加
+        foreach (var field in CustomFields.Where(f => !string.IsNullOrEmpty(f.Value)))
+        {
+            printData.CustomFields.Add(new CustomFieldPrintData
+            {
+                DisplayName = field.DisplayName,
+                Value = field.Value
+            });
+        }
+
+        // 顧客情報を取得
+        IEnumerable<CustomerPrintData>? customerData = null;
+        if (!string.IsNullOrEmpty(CustomerKey) && _sessionManager.CurrentProject != null)
+        {
+            customerData = await _inquiryPrintService.GetCustomerPrintDataAsync(
+                CustomerKey, _sessionManager.CurrentProject.ProjectID);
+        }
+
+        return _inquiryPrintService.CreateInquiryDocument(printData, customerData);
     }
 }

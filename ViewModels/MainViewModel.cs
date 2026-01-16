@@ -1,8 +1,10 @@
 using System.Windows.Input;
+using Microsoft.Extensions.DependencyInjection;
 using DeDen.Common;
 using DeDen.Models.DTOs;
 using DeDen.Models.Entities;
 using DeDen.Services;
+using DeDen.Views;
 
 namespace DeDen.ViewModels;
 
@@ -13,6 +15,8 @@ public class MainViewModel : ViewModelBase
 {
     private readonly SessionManager _sessionManager;
     private readonly IDialogService _dialogService;
+    private readonly IExportService _exportService;
+    private readonly IServiceProvider _serviceProvider;
 
     private string _headerTitle = string.Empty;
     private string _operatorName = string.Empty;
@@ -22,17 +26,23 @@ public class MainViewModel : ViewModelBase
     public MainViewModel(
         SessionManager sessionManager,
         IDialogService dialogService,
+        IExportService exportService,
+        IServiceProvider serviceProvider,
         SearchPanelViewModel searchPanelViewModel,
         CustomerInfoViewModel customerInfoViewModel,
         InquiryViewModel inquiryViewModel)
     {
         _sessionManager = sessionManager;
         _dialogService = dialogService;
+        _exportService = exportService;
+        _serviceProvider = serviceProvider;
         SearchPanel = searchPanelViewModel;
         CustomerInfo = customerInfoViewModel;
         Inquiry = inquiryViewModel;
 
         LogoutCommand = new RelayCommand(Logout);
+        ExportCsvCommand = new RelayCommand(async () => await ExportCsvAsync());
+        ShowReportCommand = new RelayCommand(ShowReport);
 
         // セッション情報の初期化
         UpdateSessionInfo();
@@ -200,6 +210,16 @@ public class MainViewModel : ViewModelBase
     public ICommand LogoutCommand { get; }
 
     /// <summary>
+    /// CSV出力コマンド
+    /// </summary>
+    public ICommand ExportCsvCommand { get; }
+
+    /// <summary>
+    /// レポート表示コマンド
+    /// </summary>
+    public ICommand ShowReportCommand { get; }
+
+    /// <summary>
     /// ログアウト要求時に発火するイベント
     /// </summary>
     public event EventHandler? LogoutRequested;
@@ -214,6 +234,62 @@ public class MainViewModel : ViewModelBase
         {
             _sessionManager.EndSession();
             LogoutRequested?.Invoke(this, EventArgs.Empty);
+        }
+    }
+
+    /// <summary>
+    /// CSV出力処理
+    /// </summary>
+    private async Task ExportCsvAsync()
+    {
+        // 問合せ履歴検索結果を取得
+        var inquiryHistories = SearchPanel.InquirySearchResults;
+
+        if (inquiryHistories == null || inquiryHistories.Count == 0)
+        {
+            _dialogService.ShowMessage("出力する問合せ履歴がありません。\n問合せ履歴検索を実行してから、CSV出力を行ってください。");
+            return;
+        }
+
+        try
+        {
+            var result = await _exportService.ExportInquiryHistoriesToCsvAsync(inquiryHistories);
+            if (result)
+            {
+                _dialogService.ShowMessage("CSV出力が完了しました。");
+            }
+        }
+        catch (Exception ex)
+        {
+            _dialogService.ShowError($"CSV出力中にエラーが発生しました。\n{ex.Message}");
+        }
+    }
+
+    /// <summary>
+    /// レポート表示処理
+    /// </summary>
+    private void ShowReport()
+    {
+        // 問合せ履歴検索結果を取得
+        var inquiryHistories = SearchPanel.InquirySearchResults;
+
+        if (inquiryHistories == null || inquiryHistories.Count == 0)
+        {
+            _dialogService.ShowMessage("表示する問合せ履歴がありません。\n問合せ履歴検索を実行してから、レポートを表示してください。");
+            return;
+        }
+
+        try
+        {
+            var reportViewModel = _serviceProvider.GetRequiredService<ReportViewModel>();
+            reportViewModel.SetInquiryHistories(inquiryHistories);
+
+            var reportView = new ReportView(reportViewModel);
+            reportView.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            _dialogService.ShowError($"レポート表示中にエラーが発生しました。\n{ex.Message}");
         }
     }
 

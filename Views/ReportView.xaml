@@ -1,0 +1,99 @@
+<Window x:Class="DeDen.Views.ReportView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="問合せ履歴レポート"
+        Height="700" Width="1000"
+        WindowStartupLocation="CenterScreen"
+        Background="#F5F5F5">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- ヘッダー -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,16">
+            <TextBlock Text="{Binding ReportTitle}"
+                       FontSize="24"
+                       FontWeight="Bold"
+                       HorizontalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal"
+                        HorizontalAlignment="Center"
+                        Margin="0,8,0,0">
+                <TextBlock Text="出力日時: " Foreground="Gray"/>
+                <TextBlock Text="{Binding GeneratedAt}" Foreground="Gray"/>
+                <TextBlock Text="　　件数: " Foreground="Gray" Margin="16,0,0,0"/>
+                <TextBlock Text="{Binding TotalCount}" Foreground="Gray"/>
+                <TextBlock Text="件" Foreground="Gray"/>
+            </StackPanel>
+        </StackPanel>
+
+        <!-- データグリッド -->
+        <Border Grid.Row="1"
+                Background="White"
+                BorderBrush="#E0E0E0"
+                BorderThickness="1"
+                CornerRadius="4">
+            <DataGrid ItemsSource="{Binding InquiryHistories}"
+                      AutoGenerateColumns="False"
+                      IsReadOnly="True"
+                      CanUserAddRows="False"
+                      CanUserDeleteRows="False"
+                      SelectionMode="Single"
+                      GridLinesVisibility="Horizontal"
+                      BorderThickness="0"
+                      Margin="8">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Binding="{Binding InquiryID}" Width="60"/>
+                    <DataGridTextColumn Header="受電日時" Binding="{Binding FirstReceivedDateTime, StringFormat=yyyy/MM/dd HH:mm}" Width="130"/>
+                    <DataGridTextColumn Header="顧客Key" Binding="{Binding CustomerKey}" Width="100"/>
+                    <DataGridTextColumn Header="カテゴリID" Binding="{Binding CategoryID}" Width="80"/>
+                    <DataGridTextColumn Header="ステータスID" Binding="{Binding StatusID}" Width="90"/>
+                    <DataGridTextColumn Header="問合せ内容" Binding="{Binding InquiryContent}" Width="*">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="対応内容" Binding="{Binding ResponseContent}" Width="200">
+                        <DataGridTextColumn.ElementStyle>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="TextTrimming" Value="CharacterEllipsis"/>
+                            </Style>
+                        </DataGridTextColumn.ElementStyle>
+                    </DataGridTextColumn>
+                    <DataGridTextColumn Header="更新日時" Binding="{Binding UpdatedDateTime, StringFormat=yyyy/MM/dd HH:mm}" Width="130"/>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+
+        <!-- フッター（ボタンエリア） -->
+        <StackPanel Grid.Row="2"
+                    Orientation="Horizontal"
+                    HorizontalAlignment="Right"
+                    Margin="0,16,0,0">
+            <Button Content="プレビュー"
+                    Command="{Binding PreviewCommand}"
+                    Width="100" Height="36"
+                    Margin="0,0,8,0"/>
+            <Button Content="印刷"
+                    Command="{Binding PrintCommand}"
+                    Width="100" Height="36"
+                    Margin="0,0,8,0"
+                    Style="{StaticResource PrimaryButtonStyle}"/>
+            <Button Content="CSV出力"
+                    Command="{Binding ExportCsvCommand}"
+                    Width="100" Height="36"
+                    Margin="0,0,8,0"/>
+            <Button Content="閉じる"
+                    Command="{Binding CloseCommand}"
+                    Width="100" Height="36"/>
+        </StackPanel>
+    </Grid>
+</Window>

@@ -105,6 +105,19 @@ CREATE TABLE IF NOT EXISTS HistoryLogSettings (
     UNIQUE (ProjectID)
 );
 
+-- レポート用顧客情報表示設定
+CREATE TABLE IF NOT EXISTS ReportCustomerDisplayConfig (
+    ConfigID INTEGER PRIMARY KEY AUTOINCREMENT,
+    ProjectID INTEGER NOT NULL,
+    DisplayOrder INTEGER NOT NULL,
+    ColumnName TEXT NOT NULL,
+    DisplayName TEXT NOT NULL,
+    CreatedAt TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+    FOREIGN KEY (ProjectID) REFERENCES ProjectMaster(ProjectID),
+    UNIQUE (ProjectID, DisplayOrder),
+    CHECK (DisplayOrder BETWEEN 1 AND 3)
+);
+
 -- ============================================
 -- 初期データ投入
 -- ============================================
@@ -187,3 +200,10 @@ VALUES
 -- 履歴保存設定
 INSERT OR IGNORE INTO HistoryLogSettings (ProjectID, EnableHistoryLog)
 VALUES (1, 1);
+
+-- レポート用顧客情報表示設定（デフォルト3項目）
+INSERT OR IGNORE INTO ReportCustomerDisplayConfig (ProjectID, DisplayOrder, ColumnName, DisplayName)
+VALUES
+    (1, 1, 'customer_name', '顧客名'),
+    (1, 2, 'tel_no', '電話番号'),
+    (1, 3, 'contract_no', '契約番号');

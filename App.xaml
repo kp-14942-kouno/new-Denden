@@ -10,6 +10,7 @@
         <converters:InverseBoolConverter x:Key="InverseBoolConverter"/>
         <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
         <converters:PositiveToVisibilityConverter x:Key="PositiveToVisibilityConverter"/>
+        <converters:PositiveToBoolConverter x:Key="PositiveToBoolConverter"/>
         <converters:FieldTypeToVisibilityConverter x:Key="FieldTypeToVisibilityConverter"/>
 
         <!-- Effects -->

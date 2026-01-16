@@ -38,6 +38,9 @@ public class DatabaseInitializer
 
         // パスワードハッシュの更新
         await UpdatePasswordHashesAsync();
+
+        // マイグレーション処理
+        await MigrateMasterDbAsync();
     }
 
     /// <summary>
@@ -152,6 +155,45 @@ public class DatabaseInitializer
         using var connection = _connectionFactory.CreateCustomerConnection();
         connection.Open();
         await connection.ExecuteAsync(script);
+    }
+
+    /// <summary>
+    /// マスタDBのマイグレーション
+    /// </summary>
+    private async Task MigrateMasterDbAsync()
+    {
+        using var connection = _connectionFactory.CreateMasterConnection();
+        connection.Open();
+
+        // ReportCustomerDisplayConfigテーブルが存在しない場合は作成
+        var tableExists = await connection.QueryFirstOrDefaultAsync<int>(
+            "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='ReportCustomerDisplayConfig'");
+
+        if (tableExists == 0)
+        {
+            const string createTableSql = @"
+                CREATE TABLE IF NOT EXISTS ReportCustomerDisplayConfig (
+                    ConfigID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ProjectID INTEGER NOT NULL,
+                    DisplayOrder INTEGER NOT NULL,
+                    ColumnName TEXT NOT NULL,
+                    DisplayName TEXT NOT NULL,
+                    CreatedAt TEXT NOT NULL DEFAULT (datetime('now', 'localtime')),
+                    FOREIGN KEY (ProjectID) REFERENCES ProjectMaster(ProjectID),
+                    UNIQUE (ProjectID, DisplayOrder),
+                    CHECK (DisplayOrder BETWEEN 1 AND 3)
+                )";
+            await connection.ExecuteAsync(createTableSql);
+
+            // デフォルト設定を投入
+            const string insertSql = @"
+                INSERT OR IGNORE INTO ReportCustomerDisplayConfig (ProjectID, DisplayOrder, ColumnName, DisplayName)
+                VALUES
+                    (1, 1, 'customer_name', '顧客名'),
+                    (1, 2, 'tel_no', '電話番号'),
+                    (1, 3, 'contract_no', '契約番号')";
+            await connection.ExecuteAsync(insertSql);
+        }
     }
 
     /// <summary>

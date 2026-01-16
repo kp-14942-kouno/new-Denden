@@ -90,6 +90,7 @@ public partial class App : Application
         services.AddScoped<IInquiryHistoryRepository, InquiryHistoryRepository>();
         services.AddScoped<IInquiryHistoryLogRepository, InquiryHistoryLogRepository>();
         services.AddScoped<ICustomFieldDefinitionRepository, CustomFieldDefinitionRepository>();
+        services.AddScoped<IReportCustomerDisplayConfigRepository, ReportCustomerDisplayConfigRepository>();
 
         // IConfigurationの登録
         services.AddSingleton<IConfiguration>(_configuration!);
@@ -98,7 +99,9 @@ public partial class App : Application
         services.AddSingleton<SessionManager>();
         services.AddSingleton<IConfigurationService, ConfigurationService>();
         services.AddSingleton<IDialogService, DialogService>();
+        services.AddSingleton<IExportService, ExportService>();
         services.AddScoped<IAuthenticationService, AuthenticationService>();
+        services.AddScoped<IInquiryPrintService, InquiryPrintService>();
 
         // ナビゲーションサービスの登録（ServiceProviderを必要とするため、後で登録）
         services.AddSingleton<INavigationService>(sp => new NavigationService(sp));
@@ -109,6 +112,7 @@ public partial class App : Application
         services.AddTransient<CustomerInfoViewModel>();
         services.AddTransient<InquiryViewModel>();
         services.AddTransient<MainViewModel>();
+        services.AddTransient<ReportViewModel>();
 
         // Windowの登録
         services.AddTransient<MainWindow>();
