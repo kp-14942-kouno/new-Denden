@@ -9,6 +9,17 @@ using DenDen.Services;
 namespace DenDen.ViewModels;
 
 /// <summary>
+/// 検索タイプの列挙型（将来のカスタム項目検索にも対応）
+/// </summary>
+public enum SearchType
+{
+    None,
+    CustomerMaster,    // 顧客マスタ
+    InquiryHistory     // 問合せ履歴
+    // CustomField     // 将来追加予定
+}
+
+/// <summary>
 /// 検索パネルのViewModel
 /// 顧客検索と問合せ履歴検索を管理
 /// </summary>
@@ -40,6 +51,7 @@ public class SearchPanelViewModel : ViewModelBase
     private object? _selectedSearchResult;
     private bool _isSearching;
     private int _selectedTabIndex;
+    private SearchType _currentSearchType = SearchType.None;
 
     // マスタデータ
     private ObservableCollection<CategoryMaster> _categories = new();
@@ -180,6 +192,26 @@ public class SearchPanelViewModel : ViewModelBase
         set => SetProperty(ref _selectedTabIndex, value);
     }
 
+    public SearchType CurrentSearchType
+    {
+        get => _currentSearchType;
+        set
+        {
+            if (SetProperty(ref _currentSearchType, value))
+            {
+                OnPropertyChanged(nameof(SearchResultLabel));
+            }
+        }
+    }
+
+    public string SearchResultLabel => CurrentSearchType switch
+    {
+        SearchType.CustomerMaster => "[顧客マスタ]検索結果",
+        SearchType.InquiryHistory => "[問合せ履歴]検索結果",
+        // SearchType.CustomField => "[カスタム項目]検索結果",
+        _ => "検索結果"
+    };
+
     #endregion
 
     #region コマンド
@@ -242,6 +274,7 @@ public class SearchPanelViewModel : ViewModelBase
 
             CustomerSearchResults = new ObservableCollection<CustomerSearchResult>(results);
             InquirySearchResults.Clear();
+            CurrentSearchType = SearchType.CustomerMaster;
         }
         catch (Exception ex)
         {
@@ -279,6 +312,7 @@ public class SearchPanelViewModel : ViewModelBase
 
             InquirySearchResults = new ObservableCollection<InquiryHistory>(results);
             CustomerSearchResults.Clear();
+            CurrentSearchType = SearchType.InquiryHistory;
         }
         catch (Exception ex)
         {

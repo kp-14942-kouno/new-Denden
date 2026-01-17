@@ -43,6 +43,7 @@ public class MainViewModel : ViewModelBase
         LogoutCommand = new RelayCommand(Logout);
         ExportCsvCommand = new RelayCommand(async () => await ExportCsvAsync());
         ShowReportCommand = new RelayCommand(ShowReport);
+        NewInquiryCommand = new RelayCommand(PrepareNewInquiry);
 
         // セッション情報の初期化
         UpdateSessionInfo();
@@ -94,6 +95,17 @@ public class MainViewModel : ViewModelBase
     /// </summary>
     private async void OnCustomerSelected(object? sender, CustomerSearchResult customer)
     {
+        // 未保存変更がある場合は確認
+        if (Inquiry.HasUnsavedChanges)
+        {
+            var result = _dialogService.ShowConfirm("入力内容が保存されていません。破棄して顧客を選択しますか？");
+            if (!result) return;
+        }
+
+        // 問合せ登録フォームをクリア
+        Inquiry.ClearWithoutConfirm();
+
+        // 顧客情報を読み込む
         await CustomerInfo.LoadCustomerAsync(customer.CustomerKey);
     }
 
@@ -102,6 +114,13 @@ public class MainViewModel : ViewModelBase
     /// </summary>
     private async void OnInquirySelected(object? sender, InquiryHistory inquiry)
     {
+        // 未保存変更がある場合は確認
+        if (Inquiry.HasUnsavedChanges)
+        {
+            var result = _dialogService.ShowConfirm("入力内容が保存されていません。破棄して履歴を表示しますか？");
+            if (!result) return;
+        }
+
         if (!string.IsNullOrEmpty(inquiry.CustomerKey))
         {
             await CustomerInfo.LoadCustomerAsync(inquiry.CustomerKey);
@@ -118,6 +137,13 @@ public class MainViewModel : ViewModelBase
     /// </summary>
     private void OnCustomerInquirySelected(object? sender, InquiryHistory inquiry)
     {
+        // 未保存変更がある場合は確認
+        if (Inquiry.HasUnsavedChanges)
+        {
+            var result = _dialogService.ShowConfirm("入力内容が保存されていません。破棄して履歴を表示しますか？");
+            if (!result) return;
+        }
+
         Inquiry.LoadInquiry(inquiry);
     }
 
@@ -127,7 +153,8 @@ public class MainViewModel : ViewModelBase
     private void OnSearchCleared(object? sender, EventArgs e)
     {
         CustomerInfo.Clear();
-        Inquiry.PrepareNew();
+        // 検索クリア時は空表示に戻す（フォーム非表示）
+        // PrepareNew()は呼ばない
     }
 
     /// <summary>
@@ -218,6 +245,11 @@ public class MainViewModel : ViewModelBase
     /// レポート表示コマンド
     /// </summary>
     public ICommand ShowReportCommand { get; }
+
+    /// <summary>
+    /// 新規登録コマンド
+    /// </summary>
+    public ICommand NewInquiryCommand { get; }
 
     /// <summary>
     /// ログアウト要求時に発火するイベント
@@ -322,5 +354,15 @@ public class MainViewModel : ViewModelBase
     private void OnSessionChanged(object? sender, EventArgs e)
     {
         UpdateSessionInfo();
+    }
+
+    /// <summary>
+    /// 新規登録の準備
+    /// </summary>
+    private void PrepareNewInquiry()
+    {
+        // 顧客情報が表示されている場合、その顧客IDを渡す
+        var customerKey = CustomerInfo.CurrentCustomerKey;
+        Inquiry.PrepareNew(customerKey);
     }
 }

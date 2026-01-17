@@ -46,6 +46,19 @@ public class CustomFieldItem : ViewModelBase
 }
 
 /// <summary>
+/// フォーム表示時の初期値スナップショット
+/// </summary>
+internal class FormSnapshot
+{
+    public int? CategoryID { get; set; }
+    public int? StatusID { get; set; }
+    public string InquiryContent { get; set; } = string.Empty;
+    public string ResponseContent { get; set; } = string.Empty;
+    public string? CustomerKey { get; set; }
+    public Dictionary<int, string?> CustomFieldValues { get; set; } = new();
+}
+
+/// <summary>
 /// 問合せ登録・更新のViewModel
 /// </summary>
 public class InquiryViewModel : ViewModelBase
@@ -61,13 +74,17 @@ public class InquiryViewModel : ViewModelBase
 
     private InquiryHistory? _currentInquiry;
     private InquiryHistory? _originalInquiry; // 更新前の状態を保持
+    private FormSnapshot? _initialSnapshot; // フォーム表示時の初期値スナップショット
     private bool _isEditMode;
+    private bool _isNewEntryMode;
     private bool _isSaving;
     private string _modeText = "新規登録モード";
 
     // 入力フィールド
     private DateTime _receivedDateTime;
     private string _operatorName = string.Empty;
+    private DateTime? _lastUpdatedDateTime;
+    private string _lastUpdatedByName = string.Empty;
     private CategoryMaster? _selectedCategory;
     private StatusMaster? _selectedStatus;
     private string _inquiryContent = string.Empty;
@@ -100,14 +117,14 @@ public class InquiryViewModel : ViewModelBase
 
         SaveCommand = new RelayCommand(async () => await SaveAsync(), () => !IsSaving);
         ClearCommand = new RelayCommand(Clear);
-        NewCommand = new RelayCommand(PrepareNew);
+        NewCommand = new RelayCommand(() => PrepareNew());
         LinkCustomerCommand = new RelayCommand(RequestLinkCustomer, () => !HasCustomerKey);
-        UnlinkCustomerCommand = new RelayCommand(UnlinkCustomer, () => HasCustomerKey);
         PrintCommand = new RelayCommand(async () => await PrintAsync());
         PreviewCommand = new RelayCommand(async () => await PreviewAsync());
 
-        // 初期状態
-        PrepareNew();
+        // 初期状態（空表示：フォーム非表示）
+        IsEditMode = false;
+        IsNewEntryMode = false;
     }
 
     #region プロパティ
@@ -122,6 +139,18 @@ public class InquiryViewModel : ViewModelBase
     {
         get => _operatorName;
         set => SetProperty(ref _operatorName, value);
+    }
+
+    public DateTime? LastUpdatedDateTime
+    {
+        get => _lastUpdatedDateTime;
+        set => SetProperty(ref _lastUpdatedDateTime, value);
+    }
+
+    public string LastUpdatedByName
+    {
+        get => _lastUpdatedByName;
+        set => SetProperty(ref _lastUpdatedByName, value);
     }
 
     public ObservableCollection<CategoryMaster> Categories
@@ -184,11 +213,61 @@ public class InquiryViewModel : ViewModelBase
                 ModeText = value ? "編集モード" : "新規登録モード";
                 OnPropertyChanged(nameof(IsNewMode));
                 OnPropertyChanged(nameof(SaveButtonText));
+                OnPropertyChanged(nameof(IsFormVisible));
+                OnPropertyChanged(nameof(HasUnsavedChanges));
             }
         }
     }
 
     public bool IsNewMode => !IsEditMode;
+
+    public bool IsNewEntryMode
+    {
+        get => _isNewEntryMode;
+        set
+        {
+            if (SetProperty(ref _isNewEntryMode, value))
+            {
+                OnPropertyChanged(nameof(IsFormVisible));
+                OnPropertyChanged(nameof(IsNewButtonVisible));
+                OnPropertyChanged(nameof(HasUnsavedChanges));
+            }
+        }
+    }
+
+    public bool IsFormVisible => IsNewEntryMode || IsEditMode;
+
+    public bool IsNewButtonVisible => !IsNewEntryMode;
+
+    public bool HasUnsavedChanges
+    {
+        get
+        {
+            if (!IsFormVisible || _initialSnapshot == null) return false;
+
+            // 各フィールドを初期値と比較
+            if (_initialSnapshot.CategoryID != (SelectedCategory?.CategoryID > 0 ? SelectedCategory.CategoryID : null))
+                return true;
+            if (_initialSnapshot.StatusID != (SelectedStatus?.StatusID > 0 ? SelectedStatus.StatusID : null))
+                return true;
+            if (_initialSnapshot.InquiryContent != (InquiryContent ?? string.Empty))
+                return true;
+            if (_initialSnapshot.ResponseContent != (ResponseContent ?? string.Empty))
+                return true;
+            if (_initialSnapshot.CustomerKey != CustomerKey)
+                return true;
+
+            // カスタム項目のチェック
+            foreach (var field in CustomFields)
+            {
+                var initialValue = _initialSnapshot.CustomFieldValues.TryGetValue(field.ColumnNumber, out var val) ? val : null;
+                if (initialValue != field.Value)
+                    return true;
+            }
+
+            return false;
+        }
+    }
 
     public string ModeText
     {
@@ -220,7 +299,6 @@ public class InquiryViewModel : ViewModelBase
     public ICommand ClearCommand { get; }
     public ICommand NewCommand { get; }
     public ICommand LinkCustomerCommand { get; }
-    public ICommand UnlinkCustomerCommand { get; }
     public ICommand PrintCommand { get; }
     public ICommand PreviewCommand { get; }
 
@@ -311,17 +389,28 @@ public class InquiryViewModel : ViewModelBase
     /// <summary>
     /// 新規登録の準備
     /// </summary>
-    public void PrepareNew()
+    /// <param name="customerKey">顧客ID（指定された場合は自動セット）</param>
+    public void PrepareNew(string? customerKey = null)
     {
+        // 未保存変更がある場合は確認
+        if (HasUnsavedChanges)
+        {
+            var result = _dialogService.ShowConfirm("入力内容が保存されていません。破棄して新規登録を開始しますか？");
+            if (!result) return;
+        }
+
         _currentInquiry = null;
         IsEditMode = false;
+        IsNewEntryMode = true;
         ReceivedDateTime = DateTime.Now;
         OperatorName = _sessionManager.CurrentOperator?.OperatorName ?? string.Empty;
+        LastUpdatedDateTime = null;
+        LastUpdatedByName = string.Empty;
         SelectedCategory = null;
         SelectedStatus = null;
         InquiryContent = string.Empty;
         ResponseContent = string.Empty;
-        CustomerKey = null;
+        CustomerKey = customerKey;  // 引数で指定された顧客IDをセット
 
         // カスタム項目をクリア
         foreach (var field in CustomFields)
@@ -329,6 +418,9 @@ public class InquiryViewModel : ViewModelBase
             field.Value = null;
             field.SelectedOption = null;
         }
+
+        // 初期値スナップショットを作成
+        _initialSnapshot = CreateSnapshot();
     }
 
     /// <summary>
@@ -355,10 +447,13 @@ public class InquiryViewModel : ViewModelBase
         // 更新前の状態を保存（履歴ログ用）
         _originalInquiry = CloneInquiry(inquiry);
         IsEditMode = true;
+        IsNewEntryMode = false;
         ReceivedDateTime = inquiry.FirstReceivedDateTime;
         CustomerKey = inquiry.CustomerKey;
         InquiryContent = inquiry.InquiryContent;
         ResponseContent = inquiry.ResponseContent ?? string.Empty;
+        LastUpdatedDateTime = inquiry.UpdatedDateTime;
+        LastUpdatedByName = inquiry.UpdatedByName ?? string.Empty;
 
         // カテゴリの選択
         if (inquiry.CategoryID.HasValue)
@@ -382,6 +477,9 @@ public class InquiryViewModel : ViewModelBase
 
         // カスタム項目の読み込み
         LoadCustomFieldValues(inquiry);
+
+        // 初期値スナップショットを作成
+        _initialSnapshot = CreateSnapshot();
     }
 
     /// <summary>
@@ -428,14 +526,6 @@ public class InquiryViewModel : ViewModelBase
     private void RequestLinkCustomer()
     {
         LinkCustomerRequested?.Invoke(this, EventArgs.Empty);
-    }
-
-    /// <summary>
-    /// 顧客紐付けを解除
-    /// </summary>
-    private void UnlinkCustomer()
-    {
-        CustomerKey = null;
     }
 
     /// <summary>
@@ -491,6 +581,18 @@ public class InquiryViewModel : ViewModelBase
             return false;
         }
 
+        if (SelectedCategory == null || SelectedCategory.CategoryID == 0)
+        {
+            _dialogService.ShowError("カテゴリーを選択してください。");
+            return false;
+        }
+
+        if (SelectedStatus == null || SelectedStatus.StatusID == 0)
+        {
+            _dialogService.ShowError("ステータスを選択してください。");
+            return false;
+        }
+
         // 必須カスタム項目のチェック
         foreach (var field in CustomFields.Where(f => f.IsRequired))
         {
@@ -529,8 +631,23 @@ public class InquiryViewModel : ViewModelBase
         await _inquiryHistoryRepository.InsertAsync(inquiry);
         _dialogService.ShowMessage("問合せを登録しました。");
 
-        // 新規登録モードに戻す
-        PrepareNew();
+        // 空表示に戻す（フォーム非表示）
+        _currentInquiry = null;
+        _initialSnapshot = null;
+        IsEditMode = false;
+        IsNewEntryMode = false;
+        SelectedCategory = null;
+        SelectedStatus = null;
+        InquiryContent = string.Empty;
+        ResponseContent = string.Empty;
+        CustomerKey = null;
+
+        // カスタム項目をクリア
+        foreach (var field in CustomFields)
+        {
+            field.Value = null;
+            field.SelectedOption = null;
+        }
     }
 
     /// <summary>
@@ -656,13 +773,75 @@ public class InquiryViewModel : ViewModelBase
     /// </summary>
     private void Clear()
     {
-        if (IsEditMode)
+        if (IsEditMode || IsNewEntryMode)
         {
-            var result = _dialogService.ShowConfirm("編集内容を破棄して新規登録モードに戻りますか？");
+            var result = _dialogService.ShowConfirm("入力内容を破棄しますか？");
             if (!result) return;
         }
 
-        PrepareNew();
+        // 空表示に戻す（フォーム非表示）
+        _currentInquiry = null;
+        _initialSnapshot = null;
+        IsEditMode = false;
+        IsNewEntryMode = false;
+        SelectedCategory = null;
+        SelectedStatus = null;
+        InquiryContent = string.Empty;
+        ResponseContent = string.Empty;
+        CustomerKey = null;
+
+        // カスタム項目をクリア
+        foreach (var field in CustomFields)
+        {
+            field.Value = null;
+            field.SelectedOption = null;
+        }
+    }
+
+    /// <summary>
+    /// 確認なしでフォームをクリア（外部から呼ばれる場合用）
+    /// </summary>
+    public void ClearWithoutConfirm()
+    {
+        // 空表示に戻す（フォーム非表示）
+        _currentInquiry = null;
+        _initialSnapshot = null;
+        IsEditMode = false;
+        IsNewEntryMode = false;
+        SelectedCategory = null;
+        SelectedStatus = null;
+        InquiryContent = string.Empty;
+        ResponseContent = string.Empty;
+        CustomerKey = null;
+
+        // カスタム項目をクリア
+        foreach (var field in CustomFields)
+        {
+            field.Value = null;
+            field.SelectedOption = null;
+        }
+    }
+
+    /// <summary>
+    /// 現在のフォーム状態のスナップショットを作成
+    /// </summary>
+    private FormSnapshot CreateSnapshot()
+    {
+        var snapshot = new FormSnapshot
+        {
+            CategoryID = SelectedCategory?.CategoryID > 0 ? SelectedCategory.CategoryID : null,
+            StatusID = SelectedStatus?.StatusID > 0 ? SelectedStatus.StatusID : null,
+            InquiryContent = InquiryContent ?? string.Empty,
+            ResponseContent = ResponseContent ?? string.Empty,
+            CustomerKey = CustomerKey
+        };
+
+        foreach (var field in CustomFields)
+        {
+            snapshot.CustomFieldValues[field.ColumnNumber] = field.Value;
+        }
+
+        return snapshot;
     }
 
     /// <summary>

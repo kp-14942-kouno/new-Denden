@@ -170,7 +170,7 @@
                         </Grid.RowDefinitions>
 
                         <Grid Grid.Row="0" Margin="0,0,0,8">
-                            <TextBlock Text="検索結果" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
+                            <TextBlock Text="{Binding SearchResultLabel}" FontWeight="Bold" FontSize="14" VerticalAlignment="Center"/>
                             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                                 <Button Content="レポート"
                                         Width="80" Height="28"
@@ -198,7 +198,7 @@
                                   GridLinesVisibility="Horizontal"
                                   Visibility="{Binding CustomerSearchResults.Count, Converter={StaticResource PositiveToVisibilityConverter}}">
                             <DataGrid.Columns>
-                                <DataGridTextColumn Header="顧客Key" Binding="{Binding CustomerKey}" Width="100"/>
+                                <DataGridTextColumn Header="顧客ID" Binding="{Binding CustomerKey}" Width="100"/>
                                 <DataGridTextColumn Header="顧客名" Binding="{Binding CustomerName}" Width="*"/>
                                 <DataGridTextColumn Header="電話番号" Binding="{Binding TelNo}" Width="120"/>
                             </DataGrid.Columns>
@@ -219,7 +219,7 @@
                                   Visibility="{Binding InquirySearchResults.Count, Converter={StaticResource PositiveToVisibilityConverter}}">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="受付日時" Binding="{Binding FirstReceivedDateTime, StringFormat=yyyy/MM/dd HH:mm}" Width="130"/>
-                                <DataGridTextColumn Header="顧客Key" Binding="{Binding CustomerKey}" Width="100"/>
+                                <DataGridTextColumn Header="顧客ID" Binding="{Binding CustomerKey}" Width="100"/>
                                 <DataGridTextColumn Header="問合せ内容" Binding="{Binding InquiryContent}" Width="*"/>
                                 <DataGridTextColumn Header="更新日時" Binding="{Binding UpdatedDateTime, StringFormat=yyyy/MM/dd HH:mm}" Width="130"/>
                                 <DataGridTextColumn Header="更新者" Binding="{Binding UpdatedByName}" Width="80"/>
@@ -366,13 +366,25 @@
                     </Grid.RowDefinitions>
 
                     <!-- ヘッダー -->
-                    <StackPanel Grid.Row="0" Margin="0,0,0,16">
-                        <TextBlock Text="問合せ登録" FontWeight="Bold" FontSize="16"/>
-                        <TextBlock Text="{Binding ModeText}" Foreground="Gray" FontSize="12" Margin="0,4,0,0"/>
-                    </StackPanel>
+                    <Grid Grid.Row="0" Margin="0,0,0,16">
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="問合せ登録" FontWeight="Bold" FontSize="16"/>
+                            <TextBlock Text="{Binding ModeText}" Foreground="Gray" FontSize="12" Margin="0,4,0,0"
+                                       Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                        </StackPanel>
+                        <Button Content="新規"
+                                Command="{Binding DataContext.NewInquiryCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                Width="80" Height="36"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Background="#F5F5F5"
+                                BorderBrush="#CCCCCC"
+                                Visibility="{Binding IsNewButtonVisible, Converter={StaticResource BoolToVisibilityConverter}}"/>
+                    </Grid>
 
                     <!-- 入力フォーム -->
-                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto"
+                                  Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -384,77 +396,105 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="Auto"/>
-                                <RowDefinition Height="*"/>
                             </Grid.RowDefinitions>
 
-                            <!-- 受電日時 -->
+                            <!-- 行0：左列 - 顧客ID -->
                             <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,8,16">
-                                <TextBlock Text="受電日時" Margin="0,0,0,4"/>
-                                <TextBox Height="32" IsReadOnly="True" Background="#F5F5F5"
-                                         Text="{Binding ReceivedDateTime, StringFormat=yyyy/MM/dd HH:mm:ss}"/>
-                            </StackPanel>
-
-                            <!-- オペレーター -->
-                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="8,0,0,16">
-                                <TextBlock Text="オペレーター" Margin="0,0,0,4"/>
-                                <TextBox Height="32" IsReadOnly="True" Background="#F5F5F5"
-                                         Text="{Binding OperatorName, Mode=OneWay}"/>
-                            </StackPanel>
-
-                            <!-- 顧客Key -->
-                            <StackPanel Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,16">
-                                <TextBlock Text="顧客Key" Margin="0,0,0,4"/>
+                                <TextBlock Text="顧客ID" Margin="0,0,0,4"/>
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
                                     <TextBox Grid.Column="0" Height="32" IsReadOnly="True" Background="#F5F5F5"
                                              Text="{Binding CustomerKey, Mode=OneWay}"/>
                                     <Button Grid.Column="1" Content="紐付け" Width="60" Height="32" Margin="8,0,0,0"
                                             Command="{Binding LinkCustomerCommand}"/>
-                                    <Button Grid.Column="2" Content="解除" Width="60" Height="32" Margin="8,0,0,0"
-                                            Command="{Binding UnlinkCustomerCommand}"/>
                                 </Grid>
                             </StackPanel>
 
-                            <!-- カテゴリー -->
-                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,16">
-                                <TextBlock Text="カテゴリー" Margin="0,0,0,4"/>
+                            <!-- 行0：右列 - 受電日時とオペレーター -->
+                            <Grid Grid.Row="0" Grid.Column="1" Margin="8,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="140"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <!-- 受電日時 -->
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="受電日時" Margin="0,0,0,4"/>
+                                    <TextBox Height="32" IsReadOnly="True" Background="#F5F5F5"
+                                             Text="{Binding ReceivedDateTime, StringFormat=yyyy/MM/dd HH:mm}"/>
+                                </StackPanel>
+                                <!-- オペレーター -->
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="オペレーター" Margin="0,0,0,4"/>
+                                    <TextBox Height="32" IsReadOnly="True" Background="#F5F5F5"
+                                             Text="{Binding OperatorName, Mode=OneWay}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- 行1：左列 - カテゴリー -->
+                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,8,16">
+                                <TextBlock Margin="0,0,0,4">
+                                    <Run Text="カテゴリー"/>
+                                    <Run Text="*" Foreground="Red"/>
+                                </TextBlock>
                                 <ComboBox Height="32"
                                           ItemsSource="{Binding Categories}"
                                           SelectedItem="{Binding SelectedCategory}"
                                           DisplayMemberPath="CategoryName"/>
                             </StackPanel>
 
-                            <!-- ステータス -->
-                            <StackPanel Grid.Row="2" Grid.Column="1" Margin="8,0,0,16">
-                                <TextBlock Text="ステータス" Margin="0,0,0,4"/>
+                            <!-- 行1：右列 - 最終更新と更新者 -->
+                            <Grid Grid.Row="1" Grid.Column="1" Margin="8,0,0,16">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="140"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <!-- 最終更新 -->
+                                <StackPanel Grid.Column="0" Margin="0,0,8,0">
+                                    <TextBlock Text="最終更新" Margin="0,0,0,4"/>
+                                    <TextBox Height="32" IsReadOnly="True" Background="#F5F5F5"
+                                             Text="{Binding LastUpdatedDateTime, StringFormat=yyyy/MM/dd HH:mm}"/>
+                                </StackPanel>
+                                <!-- 更新者 -->
+                                <StackPanel Grid.Column="1" Margin="8,0,0,0">
+                                    <TextBlock Text="更新者" Margin="0,0,0,4"/>
+                                    <TextBox Height="32" IsReadOnly="True" Background="#F5F5F5"
+                                             Text="{Binding LastUpdatedByName, Mode=OneWay}"/>
+                                </StackPanel>
+                            </Grid>
+
+                            <!-- 行2：左列 - ステータス -->
+                            <StackPanel Grid.Row="2" Grid.Column="0" Margin="0,0,8,16">
+                                <TextBlock Margin="0,0,0,4">
+                                    <Run Text="ステータス"/>
+                                    <Run Text="*" Foreground="Red"/>
+                                </TextBlock>
                                 <ComboBox Height="32"
                                           ItemsSource="{Binding Statuses}"
                                           SelectedItem="{Binding SelectedStatus}"
                                           DisplayMemberPath="StatusName"/>
                             </StackPanel>
 
-                            <!-- 問合せ内容 -->
-                            <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Margin="0,0,0,16">
+                            <!-- 行2：右列 - 空 -->
+
+                            <!-- 行3：問合せ内容と対応内容（横並び） -->
+                            <StackPanel Grid.Row="3" Grid.Column="0" Margin="0,0,8,16">
                                 <TextBlock Margin="0,0,0,4">
                                     <Run Text="問合せ内容"/>
                                     <Run Text="*" Foreground="Red"/>
                                 </TextBlock>
-                                <TextBox Height="120"
+                                <TextBox Height="200"
                                          Text="{Binding InquiryContent, UpdateSourceTrigger=PropertyChanged}"
                                          AcceptsReturn="True"
                                          TextWrapping="Wrap"
                                          VerticalScrollBarVisibility="Auto"/>
                             </StackPanel>
 
-                            <!-- 対応内容 -->
-                            <StackPanel Grid.Row="4" Grid.ColumnSpan="2" Margin="0,0,0,16">
+                            <StackPanel Grid.Row="3" Grid.Column="1" Margin="8,0,0,16">
                                 <TextBlock Text="対応内容" Margin="0,0,0,4"/>
-                                <TextBox Height="120"
+                                <TextBox Height="200"
                                          Text="{Binding ResponseContent, UpdateSourceTrigger=PropertyChanged}"
                                          AcceptsReturn="True"
                                          TextWrapping="Wrap"
@@ -462,7 +502,7 @@
                             </StackPanel>
 
                             <!-- カスタム項目エリア -->
-                            <Border Grid.Row="5" Grid.ColumnSpan="2"
+                            <Border Grid.Row="4" Grid.ColumnSpan="2"
                                     BorderBrush="#E0E0E0" BorderThickness="1"
                                     CornerRadius="4" Padding="12" Margin="0,0,0,16"
                                     Visibility="{Binding HasCustomFields, Converter={StaticResource BoolToVisibilityConverter}}">
@@ -502,7 +542,7 @@
                             </Border>
 
                             <!-- カスタム項目なしメッセージ -->
-                            <Border Grid.Row="5" Grid.ColumnSpan="2"
+                            <Border Grid.Row="4" Grid.ColumnSpan="2"
                                     BorderBrush="#E0E0E0" BorderThickness="1"
                                     CornerRadius="4" Padding="12" Margin="0,0,0,16"
                                     Visibility="{Binding HasCustomFields, Converter={StaticResource InverseBoolToVisibilityConverter}}">
@@ -517,7 +557,8 @@
                     </ScrollViewer>
 
                     <!-- ボタンエリア -->
-                    <Grid Grid.Row="2" Margin="0,16,0,0">
+                    <Grid Grid.Row="2" Margin="0,16,0,0"
+                          Visibility="{Binding IsFormVisible, Converter={StaticResource BoolToVisibilityConverter}}">
                         <!-- 左側：印刷・プレビューボタン -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                             <Button Content="プレビュー"
@@ -532,15 +573,8 @@
                                     Background="#F5F5F5"
                                     BorderBrush="#CCCCCC"/>
                         </StackPanel>
-                        <!-- 右側：新規・クリア・登録ボタン -->
+                        <!-- 右側：クリア・登録ボタン -->
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                            <Button Content="新規"
-                                    Command="{Binding NewCommand}"
-                                    Width="80" Height="36"
-                                    Margin="0,0,8,0"
-                                    Background="#F5F5F5"
-                                    BorderBrush="#CCCCCC"
-                                    Visibility="{Binding IsEditMode, Converter={StaticResource BoolToVisibilityConverter}}"/>
                             <Button Content="クリア"
                                     Command="{Binding ClearCommand}"
                                     Width="100" Height="36"
